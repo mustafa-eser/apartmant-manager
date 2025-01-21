@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 import '../../global/index.dart';
 import '../../index.dart';
 
@@ -8,10 +8,7 @@ class DetailPage extends StatefulWidget {
   final List<Fee> fees;
   final String apartmentUid;
 
-  DetailPage(
-      {required this.apartmentUid,
-      required this.apartment,
-      required this.fees});
+  DetailPage({required this.apartmentUid, required this.apartment, required this.fees});
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -53,31 +50,20 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     if (widget.apartment.id == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Apartment Details'.tr()),
-        ),
-        body: Center(
-          child: Text('Invalid Apartment Data'.tr()),
-        ),
-      );
+      return Scaffold(appBar: AppBar(title: Text('Apartment Details'.tr())), body: Center(child: Text('Invalid Apartment Data'.tr())));
     }
 
     final apartmentBalance = widget.apartment.balance ?? 0.0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Resident Details'.tr()),
-      ),
+      appBar: AppBar(title: Text('Resident Details'.tr())),
       body: RefreshIndicator(
         onRefresh: refreshPage,
         color: GlobalConfig.primaryColor,
         backgroundColor: Colors.white,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               ProfileCard(apartment: widget.apartment),
               if (widget.fees.isNotEmpty)
                 ListView.builder(
@@ -86,39 +72,56 @@ class _DetailPageState extends State<DetailPage> {
                   itemCount: widget.fees.length,
                   itemBuilder: (context, index) {
                     final fee = widget.fees[index];
-                    return ListTile(
-                      title: Text(fee.description.isNotEmpty
-                          ? fee.description
-                          : 'No Description'),
-                      subtitle: Text(formatDate(fee.feeDate)),
-                      trailing: Text(
-                        '₺ ${fee.feeAmount.toStringAsFixed(2)}',
-                        style: TextStyle(color: Colors.green),
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('Fee Type ID')),
+                            DataColumn(label: Text('Fee Date')),
+                            DataColumn(label: Text('Fee Amount')),
+                            DataColumn(label: Text('Payment Date')),
+                            DataColumn(label: Text('Payment Amount')),
+                            DataColumn(label: Text('Description')),
+                            DataColumn(label: Text('Fee UID')),
+                            DataColumn(label: Text('Completed')),
+                          ],
+                          rows: [
+                            DataRow(cells: [
+                              DataCell(Text(fee.feeTypeId.toString())),
+                              DataCell(Text(fee.feeDate)),
+                              DataCell(Text(fee.feeAmount.toStringAsFixed(2))),
+                              DataCell(Text(fee.paymentDate)),
+                              DataCell(Text(fee.paymentAmount.toStringAsFixed(2))),
+                              DataCell(Text(fee.description)),
+                              DataCell(Text(fee.feeUid)),
+                              DataCell(Checkbox(
+                                value: fee.isCompleted,
+                                onChanged: (value) {},
+                              )),
+                            ])
+                          ],
+                        ),
                       ),
                     );
                   },
                 )
+
+              // return ListTile(
+              //     title: Text(fee.description.isNotEmpty ? fee.description : 'No Description'),
+              //     subtitle: Text(formatDate(fee.feeDate)),
+              //     trailing: Text('₺ ${fee.feeAmount.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green)));
+              // })
               else
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'No fees available'.tr(),
-                  ),
-                ),
+                Padding(padding: const EdgeInsets.all(16.0), child: Text('No fees availasble'.tr())),
               if (apartmentBalance > 0)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Total Balance: ₺ ${apartmentBalance.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+                  child: Text('Total Balance: ₺ ${apartmentBalance.toStringAsFixed(2)}', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                )
+            ])),
       ),
     );
   }

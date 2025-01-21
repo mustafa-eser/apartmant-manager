@@ -1,11 +1,16 @@
 export 'modules/expenses/expenses-service.dart';
 export 'modules/expenses/expenses.dart';
+export 'modules/manager-apartment/add-IncomeExpenses.dart';
+export 'modules/manager-apartment/add-announcements.dart';
+export 'modules/manager-apartment/add-apartment-guests.dart';
+export 'modules/manager-apartment/manager-apartment.dart';
+export 'modules/manager-apartment/manager-service.dart';
 export 'modules/module/apartmants-guest-old.dart';
 export 'modules/module/credit-card-form.dart';
-export 'modules/module/resident_details_page.dart';
 export 'modules/module/home_page.dart';
 export 'modules/module/news_page.dart';
 export 'modules/module/qr_scanner_page.dart';
+export 'modules/module/resident_details_page.dart';
 export 'modules/module/webView-page.dart';
 export 'service/api-service.dart';
 export 'service/service-locator.dart';
