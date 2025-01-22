@@ -128,6 +128,7 @@ class _HomePageState extends State<HomePage> {
     if (apartments == null || apartments.isEmpty) return const SizedBox.shrink();
 
     return Padding(
+
         padding: const EdgeInsets.all(10),
         child: Container(
             width: width,
@@ -142,6 +143,7 @@ class _HomePageState extends State<HomePage> {
               SizedBox(height: width / 40),
               Text("${apartments.first.name}", style: AppTextStyles.titleBold.copyWith(color: Colors.white))
             ])));
+
   }
 
   Widget _buildHomeItem({
