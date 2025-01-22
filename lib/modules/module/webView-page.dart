@@ -88,21 +88,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
         return Dialog(
             child: Container(
                 padding: paddingAll10,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Lottie.asset('assets/failure-animation.json', repeat: false, onLoaded: (composition) {
-                      Future.delayed(composition.duration * 1, () {
-                        Navigator.of(context).pop();
-                      });
-                    }),
-                    const SizedBox(height: 16.0),
-                    Text(
-                      'Your payment was not processed. Please try again.'.tr(),
-                      style: k25Trajan(context),
-                    )
-                  ],
-                )));
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Lottie.asset('assets/failure-animation.json', repeat: false, onLoaded: (composition) {
+                    Future.delayed(composition.duration * 1, () {
+                      Navigator.of(context).pop();
+                    });
+                  }),
+                  const SizedBox(height: 16.0),
+                  Text('Your payment was not processed. Please try again.'.tr(), style: k25Trajan(context))
+                ])));
       },
     );
   }

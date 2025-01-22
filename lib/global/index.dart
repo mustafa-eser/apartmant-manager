@@ -2,6 +2,7 @@ export 'dart:convert';
 
 export 'package:easy_localization/easy_localization.dart';
 export 'package:get_it/get_it.dart';
+export 'package:image_picker/image_picker.dart';
 export 'package:intl/intl.dart';
 export 'package:lottie/lottie.dart';
 export 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
@@ -9,6 +10,7 @@ export 'package:rxdart/rxdart.dart';
 export 'package:shared_preferences/shared_preferences.dart';
 export 'package:url_launcher/url_launcher.dart';
 export 'package:webview_flutter/webview_flutter.dart';
+
 export 'constants.dart';
 export 'global-config.dart';
 export 'global-functions.dart';

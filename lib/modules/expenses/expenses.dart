@@ -15,8 +15,7 @@ class Expenses extends StatefulWidget {
   State<Expenses> createState() => _ExpensesState();
 }
 
-class _ExpensesState extends State<Expenses>
-    with SingleTickerProviderStateMixin {
+class _ExpensesState extends State<Expenses> with SingleTickerProviderStateMixin {
   final _service = GetIt.I<ExpensesService>();
   late final TabController _tabController;
   final _totalAmount$ = BehaviorSubject<double>.seeded(0);
@@ -65,13 +64,9 @@ class _ExpensesState extends State<Expenses>
       case 0:
         filteredList = _service.incomeAndExpensesList$.value!;
       case 1:
-        filteredList = _service.incomeAndExpensesList$.value!
-            .where((item) => item.typeid == 1)
-            .toList();
+        filteredList = _service.incomeAndExpensesList$.value!.where((item) => item.typeid == 1).toList();
       case 2:
-        filteredList = _service.incomeAndExpensesList$.value!
-            .where((item) => item.typeid == -1)
-            .toList();
+        filteredList = _service.incomeAndExpensesList$.value!.where((item) => item.typeid == -1).toList();
     }
 
     final totalAmount = filteredList.fold(
@@ -92,50 +87,30 @@ class _ExpensesState extends State<Expenses>
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: Text(
-        'Income & Expenses'.tr(),
-        style: AppTextStyles.cardTitle.copyWith(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-        onPressed: () => Navigator.pop(context),
-      ),
-      bottom: TabBar(
-        controller: _tabController,
-        isScrollable: false,
-        labelStyle: AppTextStyles.cardTitle.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: AppTextStyles.cardTitle.copyWith(
-          color: Colors.white.withOpacity(0.8),
-        ),
-        indicator: const BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(10),
-            topLeft: Radius.circular(10),
+        title: Text(
+          'Income & Expenses'.tr(),
+          style: AppTextStyles.cardTitle.copyWith(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-          color: Colors.white,
         ),
-        tabs: [
-          Tab(text: 'All'.tr()),
-          Tab(text: 'Income'.tr()),
-          Tab(text: 'Expenses'.tr()),
-        ],
-      ),
-    );
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        bottom: TabBar(
+            controller: _tabController,
+            isScrollable: false,
+            labelStyle: AppTextStyles.cardTitle.copyWith(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: AppTextStyles.cardTitle.copyWith(color: Colors.white.withOpacity(0.8)),
+            indicator: const BoxDecoration(borderRadius: BorderRadius.only(topRight: Radius.circular(10), topLeft: Radius.circular(10)), color: Colors.white),
+            tabs: [Tab(text: 'All'.tr()), Tab(text: 'Income'.tr()), Tab(text: 'Expenses'.tr())]));
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return Center(
-        child: CircularProgressIndicator(
-          color: GlobalConfig.primaryColor,
-        ),
-      );
+      return Center(child: CircularProgressIndicator(color: GlobalConfig.primaryColor));
     }
 
     if (_error != null) {
@@ -143,71 +118,39 @@ class _ExpensesState extends State<Expenses>
     }
 
     return StreamBuilder<List<IncomeAndExpensesModel>?>(
-      stream: _service.incomeAndExpensesList$.stream,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data == null) {
-          return _buildEmptyView();
-        }
+        stream: _service.incomeAndExpensesList$.stream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data == null) {
+            return _buildEmptyView();
+          }
 
-        return Column(
-          children: [
+          return Column(children: [
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildExpensesList(snapshot.data!, "All"),
-                  _buildExpensesList(
-                    snapshot.data!.where((item) => item.typeid == 1).toList(),
-                    "Income",
-                  ),
-                  _buildExpensesList(
-                    snapshot.data!.where((item) => item.typeid == -1).toList(),
-                    "Expenses",
-                  ),
-                ],
-              ),
-            ),
+                child: TabBarView(controller: _tabController, children: [
+              _buildExpensesList(snapshot.data!, "All"),
+              _buildExpensesList(snapshot.data!.where((item) => item.typeid == 1).toList(), "Income"),
+              _buildExpensesList(snapshot.data!.where((item) => item.typeid == -1).toList(), "Expenses")
+            ])),
             _buildTotalAmount(),
-          ],
-        );
-      },
-    );
+          ]);
+        });
   }
 
   Widget _buildErrorView() {
     return RefreshIndicator(
-      onRefresh: _initializeData,
-      color: GlobalConfig.primaryColor,
-      child: ListView(
-        children: [
+        onRefresh: _initializeData,
+        color: GlobalConfig.primaryColor,
+        child: ListView(children: [
           SizedBox(height: MediaQuery.of(context).size.height * 0.3),
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: Colors.red[300],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading data'.tr(),
-                  style: AppTextStyles.cardTitle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Pull to refresh'.tr(),
-                  style: AppTextStyles.bodyText.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text('Error loading data'.tr(), style: AppTextStyles.cardTitle),
+            const SizedBox(height: 8),
+            Text('Pull to refresh'.tr(), style: AppTextStyles.bodyText.copyWith(color: Colors.grey[600]))
+          ]))
+        ]));
   }
 
   Widget _buildEmptyView() {
@@ -246,8 +189,7 @@ class _ExpensesState extends State<Expenses>
     );
   }
 
-  Widget _buildExpensesList(
-      List<IncomeAndExpensesModel> items, String tabName) {
+  Widget _buildExpensesList(List<IncomeAndExpensesModel> items, String tabName) {
     if (items.isEmpty) {
       return Center(
         child: Column(
@@ -330,8 +272,7 @@ class _ExpensesState extends State<Expenses>
     );
   }
 
-  Card tempExpenseCard(
-      IncomeAndExpensesModel item, MaterialColor color, bool isIncome) {
+  Card tempExpenseCard(IncomeAndExpensesModel item, MaterialColor color, bool isIncome) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -408,8 +349,7 @@ class _ExpensesState extends State<Expenses>
 
         final amount = snapshot.data!;
         final isNegative = _tabController.index == 2;
-        final displayAmount =
-            "${isNegative ? '-' : ''}₺${amount.toStringAsFixed(2)}";
+        final displayAmount = "${isNegative ? '-' : ''}₺${amount.toStringAsFixed(2)}";
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),

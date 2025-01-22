@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import '../../global/index.dart';
 import 'package:apartmantmanager/modules/module/credit-card-form.dart';
+import 'package:flutter/material.dart';
+
+import '../../global/index.dart';
 
 class DetailPage extends StatefulWidget {
   final Apartment apartment;
@@ -20,7 +21,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final GlobalService _apiService = GetIt.I<GlobalService>();
-  bool _isLoading = false;
+  BehaviorSubject<Fee?> selectedFee$ = BehaviorSubject.seeded(null);
 
   @override
   void initState() {
@@ -31,7 +32,7 @@ class _DetailPageState extends State<DetailPage> {
   Future<void> _fetchData() async {
     if (!mounted) return;
 
-    setState(() => _isLoading = true);
+    isLoading$.add(true);
 
     try {
       await _apiService.fetchApartments(widget.apartmentUid);
@@ -45,7 +46,7 @@ class _DetailPageState extends State<DetailPage> {
       _showError('Failed to fetch data');
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        isLoading$.add(false);
       }
     }
   }
@@ -112,9 +113,8 @@ class _DetailPageState extends State<DetailPage> {
       child: CircleAvatar(
         radius: 40,
         backgroundColor: Colors.white,
-        backgroundImage: widget.apartment.photoUrl != null
-            ? NetworkImage(widget.apartment.photoUrl!)
-            : const AssetImage('assets/images/profile.png') as ImageProvider,
+        backgroundImage:
+            widget.apartment.photoUrl != null ? NetworkImage(widget.apartment.photoUrl!) : const AssetImage('assets/images/profile.png') as ImageProvider,
       ),
     );
   }
@@ -198,8 +198,7 @@ class _DetailPageState extends State<DetailPage> {
           if (_hasIconInfo(widget.apartment)) const SizedBox(height: 10),
           if (_hasIconInfo(widget.apartment)) _buildIconInfo(widget.apartment),
           if (_hasOwnerInfo(widget.apartment)) const _Divider(),
-          if (_hasOwnerInfo(widget.apartment))
-            _buildOwnerInfo(widget.apartment),
+          if (_hasOwnerInfo(widget.apartment)) _buildOwnerInfo(widget.apartment),
           if (_hasDateInfo(widget.apartment)) const _Divider(),
           if (_hasDateInfo(widget.apartment)) _buildDateInfo(widget.apartment),
         ],
@@ -216,22 +215,9 @@ class _DetailPageState extends State<DetailPage> {
     }
 
     return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 14,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
+      padding: EdgeInsets.only(left: 16, right: 16, top: 14, bottom: MediaQuery.of(context).padding.bottom + 16),
+      decoration:
+          BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), offset: const Offset(0, -4), blurRadius: 16)]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -337,6 +323,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    double W = MediaQuery.of(context).size.height;
+
     if (widget.apartment.id == null) {
       return Scaffold(
         appBar: AppBar(title: Text('Resident Details'.tr())),
@@ -344,124 +332,117 @@ class _DetailPageState extends State<DetailPage> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(title: Text('Resident Details'.tr())),
-      bottomNavigationBar: _buildPaymentSection(),
-      body: Column(
-        children: [
-          Stack(
-            children: [
-              _buildTopBackground(),
-              Column(
-                children: [
-                  _buildProfileCard(),
-                ],
-              ),
-            ],
-          ),
-          if (_isLoading)
-            Expanded(
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: GlobalConfig.primaryColor,
-                ),
-              ),
-            )
-          else
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(25),
-                      spreadRadius: 0,
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    if (widget.fees.isNotEmpty) _buildFeesTitle(),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: _fetchData,
-                        color: GlobalConfig.primaryColor,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
-                          itemCount: widget.fees.length,
-                          itemBuilder: (context, index) {
-                            final fee = widget.fees[index];
-                            return Card(
-                              margin: const EdgeInsets.only(
-                                  bottom: 4,
-                                  top: 4), // Reduced from 8,10 to 4,4
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ListTile(
-                                dense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: -4,
-                                  horizontal: 16,
-                                ),
-                                title: Text(
-                                  fee.description.isNotEmpty
-                                      ? fee.description
-                                      : 'No Description'.tr(),
-                                  style: AppTextStyles.cardTitle.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                subtitle: Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 2), // Reduced from 6 to 2
-                                  child: Text(
-                                    _formatDate(fee.feeDate),
-                                    style: AppTextStyles.bodyText.copyWith(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ),
-                                trailing: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(0),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    '₺${fee.feeAmount.toStringAsFixed(2)}',
-                                    style: AppTextStyles.cardTitle.copyWith(
-                                      color: GlobalConfig.primaryColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return StreamBuilder(
+        stream: isLoading$.stream,
+        builder: (context, snapshot) {
+          return Scaffold(
+            backgroundColor: Colors.grey[50],
+            appBar: AppBar(title: Text('Resident Details'.tr())),
+            bottomNavigationBar: _buildPaymentSection(),
+            body: Column(
+              children: [
+                Stack(children: [_buildTopBackground(), _buildProfileCard()]),
+                if (isLoading$.value)
+                  Expanded(child: Center(child: CircularProgressIndicator(color: GlobalConfig.primaryColor)))
+                else
+                  Expanded(
+                      child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black.withAlpha(25), spreadRadius: 0, blurRadius: 20, offset: const Offset(0, 10)),
+                              ]),
+                          child: Column(children: [
+                            if (widget.fees.isNotEmpty) _buildFeesTitle(),
+                            Expanded(
+                                child: RefreshIndicator(
+                                    onRefresh: _fetchData,
+                                    color: GlobalConfig.primaryColor,
+                                    child: Column(
+                                      children: [
+                                        // Text("asdasd"),
+                                        Expanded(
+                                          child: ListView.builder(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                            itemCount: widget.fees.length,
+                                            itemBuilder: (context, index) {
+                                              final fee = widget.fees[index];
+                                              // return ListView.builder(
+                                              //   itemBuilder: (context, index) {
+                                              //     return Row(children: [
+                                              //       Text(_getFeeTypeText(fee.feeTypeId), style: k25Gilroy(context)),
+                                              //       Text(DateFormat('dd.MM.yyyy').format(DateTime.parse(fee.feeDate))),
+                                              //       Text(fee.feeAmount.toStringAsFixed(2)),
+                                              //       Text(fee.paymentDate != null ? DateFormat('dd.MM.yyyy').format(DateTime.parse(fee.paymentDate!)) : ''),
+                                              //       Text(fee.paymentAmount.toStringAsFixed(2)),
+                                              //       Text(fee.description, style: k28Gilroy(context))
+                                              //     ]);
+                                              //   },
+                                              // );
+                                              return SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: SingleChildScrollView(
+                                                      scrollDirection: Axis.vertical,
+                                                      child: DataTable(
+                                                          clipBehavior: Clip.none,
+                                                          dataTextStyle: k28Trajan(context),
+                                                          headingTextStyle: k25Gilroy(context),
+                                                          sortColumnIndex: 0,
+                                                          onSelectAll: (b) {
+                                                            print(b);
+                                                          },
+                                                          decoration:
+                                                              BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: borderRadius10),
+                                                          columns: [
+                                                            DataColumn(label: Text('Fee Type'.tr()), headingRowAlignment: MainAxisAlignment.spaceBetween),
+                                                            DataColumn(label: Text('Fee Date'.tr())),
+                                                            DataColumn(label: Text('Amount'.tr())),
+                                                            DataColumn(label: Text('Last Payment Date'.tr())),
+                                                            DataColumn(label: Text('Payment Amount'.tr())),
+                                                            DataColumn(label: Text('Description'.tr()))
+                                                          ],
+                                                          rows: [
+                                                            DataRow(
+                                                                onLongPress: () {
+                                                                  selectedFee$.add(fee);
+                                                                },
+                                                                cells: [
+                                                                  DataCell(Text(_getFeeTypeText(fee.feeTypeId), style: k25Gilroy(context))),
+                                                                  DataCell(Text(DateFormat('dd.MM.yyyy').format(DateTime.parse(fee.feeDate)))),
+                                                                  DataCell(Text(fee.feeAmount.toStringAsFixed(2))),
+                                                                  DataCell(Text(fee.paymentDate != null
+                                                                      ? DateFormat('dd.MM.yyyy').format(DateTime.parse(fee.paymentDate!))
+                                                                      : '')),
+                                                                  DataCell(Text(fee.paymentAmount.toStringAsFixed(2))),
+                                                                  DataCell(Text(fee.description, style: k28Gilroy(context)))
+                                                                ])
+                                                          ])));
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    )))
+                          ])))
+              ],
             ),
-        ],
-      ),
-    );
+          );
+        });
+  }
+}
+
+String _getFeeTypeText(int feeTypeId) {
+  switch (feeTypeId) {
+    case 1:
+      return "Monthly Dues".tr();
+    case 2:
+      return "General Expenses".tr();
+    case 3:
+      return "Fixed Assets".tr();
+
+    default:
+      return "";
   }
 }
 
@@ -521,12 +502,9 @@ class _InfoChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        color: GlobalConfig.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: GlobalConfig.primaryColor.withOpacity(0.3),
-        ),
-      ),
+          color: GlobalConfig.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: GlobalConfig.primaryColor.withOpacity(0.3))),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -547,45 +525,17 @@ class _InfoChip extends StatelessWidget {
 
 Widget _buildOwnerInfo(Apartment apartment) {
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (apartment.ownerName != null)
-          Row(
-            children: [
-              Text(
-                "${"Home Owner".tr()}: ",
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 12,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  apartment.ownerName!,
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 12,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (apartment.ownerPhone != null)
-                Icon(Icons.phone, size: 16, color: GlobalConfig.primaryColor),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  apartment.ownerPhone!,
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 12,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-      ],
-    ),
-  );
+          Row(children: [
+            Text("${"Home Owner".tr()}: ", style: AppTextStyles.bodyText.copyWith(fontSize: 12)),
+            Expanded(child: Text(apartment.ownerName!, style: AppTextStyles.bodyText.copyWith(fontSize: 12), overflow: TextOverflow.ellipsis)),
+            if (apartment.ownerPhone != null) Icon(Icons.phone, size: 16, color: GlobalConfig.primaryColor),
+            const SizedBox(width: 4),
+            Expanded(child: Text(apartment.ownerPhone ?? '', style: AppTextStyles.bodyText.copyWith(fontSize: 12), overflow: TextOverflow.ellipsis))
+          ])
+      ]));
 }
 
 Widget _buildDateInfo(Apartment apartment) {
@@ -599,28 +549,14 @@ Widget _buildDateInfo(Apartment apartment) {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(
-                Icons.date_range,
-                size: 16,
-                color: GlobalConfig.primaryColor,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                "$formattedStartDate - $formattedEndDate",
-                style: AppTextStyles.bodyText.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const SizedBox(height: 4),
+        Row(children: [
+          Icon(Icons.date_range, size: 16, color: GlobalConfig.primaryColor),
+          const SizedBox(width: 6),
+          Text("$formattedStartDate - $formattedEndDate", style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w500))
+        ])
+      ]),
     );
   }
   return const SizedBox.shrink();
@@ -631,9 +567,7 @@ bool _hasOwnerInfo(Apartment apartment) {
 }
 
 bool _hasIconInfo(Apartment apartment) {
-  return apartment.flatNumber != null ||
-      apartment.numberOfPeople != null ||
-      apartment.plateNo != null;
+  return apartment.flatNumber != null || apartment.numberOfPeople != null || apartment.plateNo != null;
 }
 
 bool _hasDateInfo(Apartment apartment) {

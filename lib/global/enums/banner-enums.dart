@@ -1,0 +1,1 @@
+enum BannerType { SUCCESS, ERROR }

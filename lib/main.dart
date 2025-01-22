@@ -1,44 +1,30 @@
 import 'dart:ui' as ui;
 
-import 'package:apartmantmanager/modules/module/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'global/index.dart';
 import 'index.dart';
-import 'modules/module/qr_scanner_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Dependency injection setup
   GlobalFunction().getItInital();
 
   try {
-    // SharedPreferences başlatılıyor
     await PreferenceService.initializePreferences();
-
     prefs = await SharedPreferences.getInstance();
-
     apartmentUid = PreferenceService.getApartmentUid();
     apartmentName = PreferenceService.getApartmentName();
 
     if (apartmentUid == null || apartmentName == null) {
       debugPrint('Apartment UID veya Apartment Name null.');
     }
-
-    // Dil ayarlarını başlat
     selectedlang = await _initialAppLanguage();
 
     runApp(EasyLocalization(
         startLocale: Locale(selectedlang!),
-        supportedLocales: const [
-          Locale('en'),
-          Locale('tr'),
-          Locale('de'),
-          Locale('ru')
-        ],
+        supportedLocales: const [Locale('en'), Locale('tr'), Locale('de'), Locale('ru')],
         fallbackLocale: const Locale('en'),
         path: 'assets/translations',
         child: const MyApp()));
@@ -60,7 +46,7 @@ Future<String> _initialAppLanguage() async {
     return selectedlang!;
   } catch (e) {
     debugPrint('Dil başlatma sırasında hata oluştu: $e');
-    return 'en'; // Varsayılan dil
+    return 'tr';
   }
 }
 
@@ -102,8 +88,7 @@ class _MyAppState extends State<MyApp> {
         elevation: 0,
         toolbarHeight: 60,
         centerTitle: true,
-        systemOverlayStyle:
-            const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+        systemOverlayStyle: const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         elevation: 0,
