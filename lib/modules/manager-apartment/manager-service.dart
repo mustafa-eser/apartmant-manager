@@ -5,13 +5,13 @@ import 'package:http/http.dart' as http;
 import '../../global/index.dart';
 
 class ManagerService {
-  BehaviorSubject<List<ApartmantManagerInfoModel>?> manager$ = BehaviorSubject.seeded(null);
+  BehaviorSubject<List<ApartmantManagerInfoModel>?> manager$ =
+      BehaviorSubject.seeded(null);
 
   final TextEditingController nameCont = TextEditingController();
   final TextEditingController surnameCont = TextEditingController();
   final TextEditingController emailCont = TextEditingController();
   final TextEditingController apartmentNameCont = TextEditingController();
-
   final TextEditingController phoneCont = TextEditingController();
   final TextEditingController ownerNameCont = TextEditingController();
   final TextEditingController ownerPhoneCont = TextEditingController();
@@ -23,6 +23,10 @@ class ManagerService {
   final TextEditingController plateCont = TextEditingController();
   final TextEditingController ownerCont = TextEditingController();
   final TextEditingController balanceCont = TextEditingController();
+  final TextEditingController descriptionCont = TextEditingController();
+  final TextEditingController amountCont = TextEditingController();
+  final TextEditingController typeIdCont = TextEditingController();
+  final TextEditingController contentCont = TextEditingController();
   BehaviorSubject<DateTime?> startDate$ = BehaviorSubject.seeded(null);
   BehaviorSubject<DateTime?> endDate$ = BehaviorSubject.seeded(null);
 
@@ -35,7 +39,10 @@ class ManagerService {
           body: json.encode({
             "Action": "Execute",
             "Object": "SP_APARTMENT_SITES",
-            "Parameters": {"HOTELID": GlobalConfig.hotelId, "APTUID": apartmentUid}
+            "Parameters": {
+              "HOTELID": GlobalConfig.hotelId,
+              "APTUID": apartmentUid
+            }
           }));
 
       if (response.statusCode == 200) {
@@ -89,8 +96,8 @@ class ManagerService {
               "IDNO": nationaltyNo,
               "PHONE": phone,
               "NUMBEROFPEOPLE": numberOfPeople,
-              "STARTDATE": startDate,
-              "ENDDATE": endDate,
+              "STARTDATE": startDate?.toIso8601String(),
+              "ENDDATE": endDate?.toIso8601String(),
               "PLATENO": plateNo,
               "OWNERNAME": ownerName,
               "OWNERPHONE": ownerPhone,
@@ -100,50 +107,142 @@ class ManagerService {
           }));
 
       if (response.statusCode == 200) {
-        var data = json.decode(utf8.decode(response.bodyBytes));
+        try {
+          var data = json.decode(utf8.decode(response.bodyBytes));
+
+          if (data['status'] == 'success' || data['result'] == true) {
+            return RequestResponse(
+                message: "Apartment guest added/updated successfully.",
+                result: true);
+          } else {
+            String errorMessage =
+                data['message'] ?? "Apartment guest could not be added/updated";
+            return RequestResponse(message: errorMessage, result: false);
+          }
+        } catch (decodeError) {
+          return RequestResponse(
+            message: "Response parsing failed: ${decodeError.toString()}",
+            result: false,
+          );
+        }
+      } else {
+        return RequestResponse(
+          message: "Server error: ${response.statusCode}",
+          result: false,
+        );
       }
-    } catch (e, stackTrace) {}
-
-    return null;
-  }
-
-  Future<RequestResponse?> addAnnouncement() async {
-    try {
-      var response = await http.post(
-        Uri.parse(GlobalConfig.url),
-        body: json.encode({
-          "Action": "Execute",
-          "Object": "SP_MOBILE_APARTMENT_NEWS_LIST",
-          "Parameters": {"APARTMENTUID": apartmentUid}
-        }),
+    } catch (e) {
+      return RequestResponse(
+        message: "Network error: ${e.toString()}",
+        result: false,
       );
-
-      if (response.statusCode == 200) {
-        var data = json.decode(utf8.decode(response.bodyBytes));
-      }
-    } catch (e, stackTrace) {}
-
-    return null;
+    }
   }
 
-  Future<RequestResponse?> addIncomeAndExpenses() async {
+  Future<RequestResponse?> addAnnouncement(
+      {DateTime? startDate, DateTime? endDate, String? content}) async {
     try {
       var response = await http.post(
         Uri.parse(GlobalConfig.url),
+        headers: {'User-Agent': 'apartmentApp_1.0.0'},
         body: json.encode({
           "Action": "Execute",
-          "Object": "SP_MOBILE_APARTMENT_NEWS_LIST",
+          "Object": "SP_MOBILE_APARTMENT_NEWS_INSERT",
           "Parameters": {
             "APARTMENTUID": apartmentUid,
+            "STARTDATE": startDate?.toIso8601String() ??
+                DateTime.now().toIso8601String(),
+            "ENDDATE":
+                endDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
+            "CONTENT": content,
           }
         }),
       );
 
       if (response.statusCode == 200) {
-        var data = json.decode(utf8.decode(response.bodyBytes));
+        try {
+          var responseBody = utf8.decode(response.bodyBytes);
+          var data = json.decode(responseBody);
+          var result = data[0][0]['SUCCESS'].toString();
+          if (int.tryParse(result) == 1) {
+            return RequestResponse(
+                message: "Announcement added successfully", result: true);
+          } else {
+            return RequestResponse(
+                message: "Unexpected response format: $responseBody",
+                result: false);
+          }
+        } catch (decodeError) {
+          return RequestResponse(
+            message: "Response parsing failed: $decodeError",
+            result: false,
+          );
+        }
+      } else {
+        return RequestResponse(
+          message: "Server error: ${response.statusCode}",
+          result: false,
+        );
       }
-    } catch (e, stackTrace) {}
+    } catch (e) {
+      return RequestResponse(
+        message: "Network error: $e",
+        result: false,
+      );
+    }
+  }
 
-    return null;
+  Future<RequestResponse?> addIncomeAndExpenses(
+      {DateTime? date,
+      int? typeId,
+      String? description,
+      double? amount}) async {
+    try {
+      var response = await http.post(
+        Uri.parse(GlobalConfig.url),
+        body: json.encode({
+          "Action": "Execute",
+          "Object": "SP_MOBILE_APARTMENT_MONTHLY_EXPENSE_INSERT",
+          "Parameters": {
+            "DATE": date?.toIso8601String(),
+            "APARTMENTUID": apartmentUid,
+            "TYPEID": typeId,
+            "DESCRIPTION": description,
+            "AMOUNT": amount
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        try {
+          var responseBody = utf8.decode(response.bodyBytes);
+          var data = json.decode(responseBody);
+          var result = data[0][0]['SUCCESS'].toString();
+          if (int.tryParse(result) == 1) {
+            return RequestResponse(
+                message: "Income/Expense added successfully", result: true);
+          } else {
+            return RequestResponse(
+                message: "Unexpected response format: $responseBody",
+                result: false);
+          }
+        } catch (decodeError) {
+          return RequestResponse(
+            message: "Response parsing failed: $decodeError",
+            result: false,
+          );
+        }
+      } else {
+        return RequestResponse(
+          message: "Server error: ${response.statusCode}",
+          result: false,
+        );
+      }
+    } catch (e) {
+      return RequestResponse(
+        message: "Network error: ${e.toString()}",
+        result: false,
+      );
+    }
   }
 }
