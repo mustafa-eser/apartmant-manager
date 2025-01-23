@@ -9,7 +9,8 @@ import '../index.dart';
 
 Flushbar? _currentFlushbar;
 
-Flushbar kShowBanner(BannerType bannerType, String text, BuildContext context, {int? durationSeconds, Function()? onDismissed, Color? color}) {
+Flushbar kShowBanner(BannerType bannerType, String text, BuildContext context,
+    {int? durationSeconds, Function()? onDismissed, Color? color}) {
   if (_currentFlushbar != null) {
     _currentFlushbar!.dismiss();
   }
@@ -19,7 +20,11 @@ Flushbar kShowBanner(BannerType bannerType, String text, BuildContext context, {
   switch (bannerType) {
     case BannerType.ERROR:
       notificationBanner = DefaultNotificationBanner(
-          iconPath: 'assets/image/wrong.png', text: tr(text), color: color ?? Colors.red, context: context, durationSeconds: durationSeconds ?? 7);
+          iconPath: 'assets/image/wrong.png',
+          text: tr(text),
+          color: color ?? Colors.red,
+          context: context,
+          durationSeconds: durationSeconds ?? 7);
       break;
 
     case BannerType.SUCCESS:
@@ -40,14 +45,22 @@ Flushbar kShowBanner(BannerType bannerType, String text, BuildContext context, {
   return _currentFlushbar!;
 }
 
-Future<void> kShowDialogBanner(BannerType bannerType, String text, BuildContext context, {int? durationSeconds, Function()? onDismissed, Color? color}) async {
+Future<void> kShowDialogBanner(
+    BannerType bannerType, String text, BuildContext context,
+    {int? durationSeconds, Function()? onDismissed, Color? color}) async {
   switch (bannerType) {
     case BannerType.ERROR:
-      await _showDialog(context, 'Error', text, 'assets/animation/alert.json', color ?? Colors.red);
+      await _showDialog(context, 'Error', text, 'assets/animation/alert.json',
+          color ?? Colors.red);
       break;
 
     case BannerType.SUCCESS:
-      await _showDialog(context, 'Success', text, 'assets/animation/success-dialog.json', const Color.fromARGB(255, 9, 184, 14));
+      await _showDialog(
+          context,
+          'Success',
+          text,
+          'assets/animation/success-dialog.json',
+          const Color.fromARGB(255, 9, 184, 14));
       break;
 
     default:
@@ -55,16 +68,28 @@ Future<void> kShowDialogBanner(BannerType bannerType, String text, BuildContext 
   }
 }
 
-Future<void> kShowNavigatorDialogBanner(BannerType bannerType, String text, String navigatorTitle, BuildContext context,
-    {int? durationSeconds, Function()? onDismissed, Color? color, required Widget navigator}) async {
+Future<void> kShowNavigatorDialogBanner(BannerType bannerType, String text,
+    String navigatorTitle, BuildContext context,
+    {int? durationSeconds,
+    Function()? onDismissed,
+    Color? color,
+    required Widget navigator}) async {
   {
     switch (bannerType) {
       case BannerType.ERROR:
-        showNavigatorDialog(context, 'Error', text, navigatorTitle, 'assets/animation/alert.json', color ?? Colors.red, navigator);
+        showNavigatorDialog(context, 'Error', text, navigatorTitle,
+            'assets/animation/alert.json', color ?? Colors.red, navigator);
         break;
 
       case BannerType.SUCCESS:
-        showNavigatorDialog(context, 'Success', text, navigatorTitle, 'assets/animation/success-dialog.json', const Color.fromARGB(255, 9, 184, 14), navigator);
+        showNavigatorDialog(
+            context,
+            'Success',
+            text,
+            navigatorTitle,
+            'assets/animation/success-dialog.json',
+            const Color.fromARGB(255, 9, 184, 14),
+            navigator);
         break;
 
       default:
@@ -85,34 +110,65 @@ Future<void> _showDialog(
       builder: (BuildContext context) {
         double W = MediaQuery.of(context).size.width;
         return AlertDialog(
-          title: Container(alignment: Alignment.center, child: Lottie.asset(iconPath, width: W / 5, height: W / 5, fit: BoxFit.cover)),
-          content: Text(message, textAlign: TextAlign.center, style: k25Gilroy(context, color: Colors.black)),
-          actions: [CButton(title: "Okay".tr(), func: () => Navigator.of(context).pop(), width: W, isLoadingActive: true, height: W / 10, isBorder: true)],
+          title: Container(
+              alignment: Alignment.center,
+              child: Lottie.asset(iconPath,
+                  width: W / 5, height: W / 5, fit: BoxFit.cover)),
+          content: Text(message,
+              textAlign: TextAlign.center,
+              style: k25Gilroy(context, color: Colors.black)),
+          actions: [
+            CButton(
+                title: "Okay".tr(),
+                func: () => Navigator.of(context).pop(),
+                width: W,
+                isLoadingActive: true,
+                height: W / 10,
+                isBorder: true)
+          ],
         );
       });
 }
 
 Future<void> showNavigatorDialog(
-    BuildContext context, String title, String navigatorTitle, String message, String iconPath, Color color, Widget navigator) async {
+    BuildContext context,
+    String title,
+    String navigatorTitle,
+    String message,
+    String iconPath,
+    Color color,
+    Widget navigator) async {
   return showDialog(
     context: context,
     builder: (BuildContext context) {
       double W = MediaQuery.of(context).size.width;
       return AlertDialog(
-        title: Container(alignment: Alignment.center, child: Lottie.asset(iconPath, width: W / 5, height: W / 5, fit: BoxFit.cover)),
-        content: Text(message, textAlign: TextAlign.center, style: k25Gilroy(context, color: Colors.black)),
+        title: Container(
+            alignment: Alignment.center,
+            child: Lottie.asset(iconPath,
+                width: W / 5, height: W / 5, fit: BoxFit.cover)),
+        content: Text(message,
+            textAlign: TextAlign.center,
+            style: k25Gilroy(context, color: Colors.black)),
         actions: [
           CButton(
               title: navigatorTitle,
               func: () {
                 Navigator.of(context).pop();
-                Navigator.push(context, RouteAnimation.createRoute(navigator, 1, 0));
+                Navigator.push(
+                    context, RouteAnimation.createRoute(navigator, 1, 0));
               },
               width: W,
               isLoadingActive: true,
               height: W / 10),
           SizedBox(height: W / 40),
-          CButton(title: "Okay".tr(), func: () => Navigator.of(context).pop(), width: W, isLoadingActive: true, height: W / 10, isBorder: true),
+          CButton(
+              title: "Okay".tr(),
+              func: () => Navigator.of(context).pop(),
+              width: W,
+              isLoadingActive: true,
+              height: W / 10,
+              isBorder: true),
         ],
       );
     },
