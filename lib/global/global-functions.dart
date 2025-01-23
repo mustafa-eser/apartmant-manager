@@ -1,7 +1,5 @@
 import 'dart:io';
-
-import 'package:images_picker/images_picker.dart';
-
+import 'package:image_picker/image_picker.dart'; // Changed to image_picker
 import '../index.dart';
 import 'index.dart';
 
@@ -35,9 +33,13 @@ class GlobalFunction {
 
   Future<File?> selectImageFromCamera() async {
     try {
-      List<Media>? files = await ImagesPicker.openCamera(pickType: PickType.image);
-      if (files != null && files.length == 1) {
-        return await filePathToFile(files.first.path);
+      final ImagePicker picker =
+          ImagePicker(); // ImagePicker instance for camera
+      final XFile? file = await picker.pickImage(source: ImageSource.camera);
+
+      if (file != null) {
+        return await filePathToFile(
+            file.path); // Return the image file from the camera
       }
       return null;
     } catch (e) {
@@ -48,13 +50,13 @@ class GlobalFunction {
 
   Future<File?> selectImageFromGallery() async {
     try {
-      final ImagePicker picker = ImagePicker();
-
+      final ImagePicker picker =
+          ImagePicker(); // ImagePicker instance for gallery
       final XFile? file = await picker.pickImage(source: ImageSource.gallery);
 
       if (file != null) {
         print("Image selected: ${file.path}");
-        return File(file.path);
+        return File(file.path); // Return the selected image file
       } else {
         print("No image selected.");
       }
@@ -62,5 +64,6 @@ class GlobalFunction {
       print("Error selecting image: $e");
       return null;
     }
+    return null;
   }
 }
