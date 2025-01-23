@@ -115,7 +115,7 @@ class _AddIncomeExpensesState extends State<AddIncomeExpenses> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: _transactionType == 1
-                      ? Colors.green.withOpacity(0.2)
+                      ? Colors.green.withAlpha(50)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -258,12 +258,19 @@ class _AddIncomeExpensesState extends State<AddIncomeExpenses> {
           ),
           elevation: 0,
         ),
-        child: Text(
-          "Add Transaction".tr(),
-          style: AppTextStyles.cardTitle.copyWith(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add_card_outlined),
+            const SizedBox(width: 10),
+            Text(
+              "Add Transaction".tr(),
+              style: AppTextStyles.cardTitle.copyWith(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -278,8 +285,10 @@ class _AddIncomeExpensesState extends State<AddIncomeExpenses> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
+        return Center(
+          child: CircularProgressIndicator(
+            color: GlobalConfig.primaryColor,
+          ),
         );
       },
     );

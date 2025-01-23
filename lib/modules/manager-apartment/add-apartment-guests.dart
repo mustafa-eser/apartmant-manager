@@ -89,17 +89,15 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
                                 required: false,
                                 customValidator: _validatePhoneNumber,
                               ),
-                              const SizedBox(height: 24),
-                              FormWidgets.buildSectionHeader(
-                                  "Identification", Icons.badge_outlined),
+
                               FormWidgets.buildFormField(
                                 "Nationality No",
                                 managerService.nationaltyNoCont,
                                 keyboardType: TextInputType.number,
-                                required: true,
+                                required: false,
                                 customValidator: _validateNationalityNumber,
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 18),
                               FormWidgets.buildSectionHeader(
                                   "Apartment Details", Icons.apartment),
                               FormWidgets.buildFormField(
@@ -133,9 +131,10 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 18),
                               FormWidgets.buildSectionHeader(
-                                  "Additional Information", Icons.info_outline),
+                                  "Balance Information",
+                                  Icons.account_balance_wallet_outlined),
 
                               FormWidgets.buildFormField(
                                 "Balance",
@@ -190,12 +189,19 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
           ),
           elevation: 0,
         ),
-        child: Text(
-          "Add Guest".tr(),
-          style: AppTextStyles.cardTitle.copyWith(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.person_add_alt_1_outlined),
+            const SizedBox(width: 10),
+            Text(
+              "Add Resident".tr(),
+              style: AppTextStyles.cardTitle.copyWith(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -210,8 +216,10 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
+        return Center(
+          child: CircularProgressIndicator(
+            color: GlobalConfig.primaryColor,
+          ),
         );
       },
     );
@@ -219,17 +227,18 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
     managerService
         .addAndUpdateApartmentGuest(
       guestId: null,
+      contactName: managerService.contactNameCont.text,
       email: managerService.emailCont.text,
       phone: int.tryParse(managerService.phoneCont.text) ?? 0,
       nationaltyNo: int.tryParse(managerService.nationaltyNoCont.text) ?? 0,
-      numberOfPeople: int.tryParse(managerService.numberOfPeopleCont.text) ?? 1,
-      flatNumber: managerService.flatNumberCont.text,
-      apartmentName: managerService.apartmentNameCont.text,
-      balance: double.tryParse(managerService.balanceCont.text) ?? 0.0,
       blockName: managerService.blockNameCont.text,
+      plateNo: managerService.plateCont.text,
+      flatNumber: managerService.flatNumberCont.text,
+      numberOfPeople: int.tryParse(managerService.numberOfPeopleCont.text) ?? 1,
+      balance: double.tryParse(managerService.balanceCont.text) ?? 0.0,
+      apartmentName: managerService.apartmentNameCont.text,
       endDate: managerService.endDate$.value,
       startDate: managerService.startDate$.value,
-      contactName: managerService.contactNameCont.text,
     )
         .then((response) {
       Navigator.pop(context);
@@ -254,7 +263,7 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
         showCustomBanner(
           context,
           title: "Process Failed".tr(),
-          message: "New apartment resident cannot be added".tr(),
+          message: response.message,
           isSuccess: false,
         );
       }
@@ -331,7 +340,7 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade400),
+            border: Border.all(color: Colors.grey.shade300),
             color: Colors.white,
             boxShadow: [
               BoxShadow(
@@ -360,12 +369,16 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
             height: (width - 32) / 1.57,
             child: PhotoView(
               imageProvider: FileImage(File(selectedPhoto$.value!.path)),
-              initialScale: 0.093,
+              initialScale: PhotoViewComputedScale.covered,
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              backgroundDecoration: BoxDecoration(color: Colors.grey.shade300),
+              basePosition: Alignment.center,
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: ElevatedButton.icon(
             onPressed: () {
               selectedPhoto$.value = null;
@@ -374,12 +387,17 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
             icon: const Icon(Icons.delete_outline),
             label: Text(
               "Remove Photo".tr(),
-              style: AppTextStyles.bodyText,
+              style: AppTextStyles.bodyText
+                  .copyWith(color: GlobalConfig.primaryColor),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade50,
-              foregroundColor: Colors.red,
+              backgroundColor: GlobalConfig.primaryColor.withAlpha(20),
+              foregroundColor: GlobalConfig.primaryColor,
               elevation: 0,
+              side: BorderSide(color: GlobalConfig.primaryColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ),
@@ -392,12 +410,6 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Icon(
-            Icons.add_a_photo_outlined,
-            size: 42,
-            color: GlobalConfig.primaryColor,
-          ),
-          const SizedBox(height: 16),
           Text(
             "Add Guest Photo".tr(),
             style: AppTextStyles.cardTitle.copyWith(
@@ -458,15 +470,15 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
         ),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            primary ? GlobalConfig.primaryColor : Colors.grey.shade50,
-        foregroundColor: primary ? Colors.white : Colors.grey.shade800,
+        backgroundColor: primary ? GlobalConfig.primaryColor : Colors.white,
+        foregroundColor: primary ? Colors.white : GlobalConfig.primaryColor,
         elevation: 0,
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: primary ? Colors.transparent : Colors.grey.shade400,
+            width: 1.5,
+            color: primary ? Colors.transparent : GlobalConfig.primaryColor,
           ),
         ),
       ),

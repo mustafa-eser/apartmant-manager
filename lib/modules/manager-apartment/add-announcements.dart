@@ -44,7 +44,7 @@ class _AddAnnouncementsState extends State<AddAnnouncements> {
                         children: [
                           FormWidgets.buildSectionHeader(
                               "Announcement Details".tr(),
-                              Icons.notification_add_outlined),
+                              Icons.notifications_outlined),
 
                           // Start Date
                           _buildDateField(context,
@@ -156,12 +156,19 @@ class _AddAnnouncementsState extends State<AddAnnouncements> {
           ),
           elevation: 0,
         ),
-        child: Text(
-          "Add Announcement".tr(),
-          style: AppTextStyles.cardTitle.copyWith(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.notification_add_outlined),
+            const SizedBox(width: 10),
+            Text(
+              "Add Announcement".tr(),
+              style: AppTextStyles.cardTitle.copyWith(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -177,8 +184,10 @@ class _AddAnnouncementsState extends State<AddAnnouncements> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
+        return Center(
+          child: CircularProgressIndicator(
+            color: GlobalConfig.primaryColor,
+          ),
         );
       },
     );
