@@ -1,11 +1,9 @@
 import 'dart:io';
 
-import 'package:apartmantmanager/global/enums/banner-enums.dart';
-import 'package:apartmantmanager/global/helpers/constants.dart';
 import 'package:apartmantmanager/global/index.dart';
 import 'package:apartmantmanager/modules/manager-apartment/manager-service.dart';
-import 'package:apartmantmanager/widgets/CButton.dart';
-import 'package:apartmantmanager/widgets/CTextFormField.dart';
+import 'package:apartmantmanager/widgets/custom_alert.dart';
+import 'package:apartmantmanager/widgets/form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -20,284 +18,458 @@ class _AddApartmentGuestsState extends State<AddApartmentGuests> {
   final globalService = GetIt.I<GlobalService>();
   final managerService = GetIt.I<ManagerService>();
   BehaviorSubject<File?> selectedPhoto$ = BehaviorSubject.seeded(null);
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    double W = MediaQuery.of(context).size.width;
+    double w = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: Text("Add Apartment Guest".tr())),
+      appBar: AppBar(
+        title: Text(
+          "Add Apartment Guest".tr(),
+        ),
+        elevation: 0,
+        backgroundColor: GlobalConfig.primaryColor,
+        foregroundColor: Colors.white,
+      ),
       body: StreamBuilder(
-          stream: Rx.combineLatest2(managerService.startDate$, managerService.endDate$, (a, b) => null),
-          builder: (context, snapshot) {
-            return Column(children: [
+        stream: Rx.combineLatest2(
+            managerService.startDate$, managerService.endDate$, (a, b) => null),
+        builder: (context, snapshot) {
+          return Column(
+            children: [
               Expanded(
+                child: Form(
+                  key: _formKey,
                   child: SingleChildScrollView(
-                      child: Container(
-                          padding: paddingAll5,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPhotoSection(w, theme),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              StreamBuilder(
-                                  stream: selectedPhoto$.stream,
-                                  builder: (context, snapshot) {
-                                    return Container(
-                                        decoration: BoxDecoration(color: Colors.white, borderRadius: borderRadius8, border: Border.all(color: Colors.black87)),
-                                        child: selectedPhoto$.value != null
-                                            ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                SizedBox(
-                                                    width: MediaQuery.of(context).size.width - 32,
-                                                    height: (MediaQuery.of(context).size.width - 32) / 1.57,
-                                                    child: ClipRRect(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        child: PhotoView(imageProvider: FileImage(File(selectedPhoto$.value!.path)), initialScale: 0.093))),
-                                                Container(
-                                                    width: W - 32,
-                                                    padding: paddingAll10,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white60,
-                                                        boxShadow: [
-                                                          BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 1, blurRadius: 5, offset: Offset(0, 3))
-                                                        ],
-                                                        borderRadius:
-                                                            const BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
-                                                        border: const Border(
-                                                            left: BorderSide(color: Colors.white),
-                                                            right: BorderSide(color: Colors.white),
-                                                            bottom: BorderSide(color: Colors.white))),
-                                                    child: CButton(
-                                                        title: "Delete Photo".tr(),
-                                                        backgroundColor: Colors.white,
-                                                        isBorder: true,
-                                                        func: () {
-                                                          selectedPhoto$.value = null;
-                                                          selectedPhoto$.add(selectedPhoto$.value);
-                                                        }))
-                                              ])
-                                            : Column(
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                      width: W - 32,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
-                                                      ),
-                                                      child: Padding(
-                                                          padding: paddingAll15,
-                                                          child: Column(children: [
-                                                            Container(
-                                                                padding: paddingAll15,
-                                                                decoration: BoxDecoration(
-                                                                    border: Border.all(color: Colors.white),
-                                                                    borderRadius: BorderRadius.circular(12),
-                                                                    color: Colors.white,
-                                                                    boxShadow: const [
-                                                                      BoxShadow(color: Color(0x0C101828), blurRadius: 2, offset: Offset(0, 1), spreadRadius: 0)
-                                                                    ]),
-                                                                child: const Icon(Icons.camera_alt_outlined)),
-                                                            SizedBox(height: W / 40),
-                                                            Text("Take a new photo or select one from your photos".tr(),
-                                                                style: k25Gilroy(context), textAlign: TextAlign.center)
-                                                          ]))),
-                                                  Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          borderRadius:
-                                                              const BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                                          border: Border(
-                                                              left: BorderSide(color: Colors.white),
-                                                              right: BorderSide(color: Colors.white),
-                                                              bottom: BorderSide(color: Colors.white))),
-                                                      child: Padding(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                                          child: Row(children: [
-                                                            Expanded(
-                                                              child: InkWell(
-                                                                child: Container(
-                                                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                                                    decoration: BoxDecoration(
-                                                                        boxShadow: const [
-                                                                          BoxShadow(
-                                                                              color: Color(0x0C101828), blurRadius: 2, offset: Offset(0, 1), spreadRadius: 0)
-                                                                        ],
-                                                                        color: Colors.black87,
-                                                                        borderRadius: BorderRadius.circular(8),
-                                                                        border: Border.all(color: Colors.white)),
-                                                                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                                                      const Icon(Icons.photo_camera, color: Colors.white),
-                                                                      const SizedBox(width: 8),
-                                                                      Text("Take a Photo".tr(),
-                                                                          textAlign: TextAlign.center, style: k25Gilroy(context, color: Colors.white))
-                                                                    ])),
-                                                                onTap: () async {
-                                                                  selectedPhoto$.value = await GlobalFunction().selectImageFromCamera();
-                                                                  selectedPhoto$.add(selectedPhoto$.value);
-                                                                },
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: W / 40),
-                                                            Expanded(
-                                                                child: InkWell(
-                                                              child: Container(
-                                                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                                                  decoration: BoxDecoration(
-                                                                      boxShadow: const [
-                                                                        BoxShadow(
-                                                                            color: Color(0x0C101828), blurRadius: 2, offset: Offset(0, 1), spreadRadius: 0)
-                                                                      ],
-                                                                      color: GlobalConfig.primaryColor,
-                                                                      borderRadius: BorderRadius.circular(8),
-                                                                      border: Border.all(
-                                                                        color: GlobalConfig.primaryColor,
-                                                                      )),
-                                                                  child: Center(
-                                                                      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                                                    const Icon(Icons.photo_library, color: Colors.white),
-                                                                    const SizedBox(width: 8),
-                                                                    Text("Select Photo".tr(), style: k25Gilroy(context, color: Colors.white))
-                                                                  ]))),
-                                                              onTap: () async {
-                                                                selectedPhoto$.value = await GlobalFunction().selectImageFromGallery();
-                                                                selectedPhoto$.add(selectedPhoto$.value);
-                                                              },
-                                                            ))
-                                                          ])))
-                                                ],
-                                              ));
-                                  }),
-                              CTextFormField(labelText: "Apartment Name".tr(), controller: managerService.apartmentNameCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Name".tr(), controller: managerService.nameCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Last Name".tr(), controller: managerService.surnameCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Email".tr(), controller: managerService.emailCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Phone Number".tr(), controller: managerService.phoneCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Nationalty No".tr(), controller: managerService.nationaltyNoCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Block Name".tr(), controller: managerService.blockNameCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Plate No".tr(), controller: managerService.plateCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              Row(children: [
-                                Expanded(
-                                    child: CTextFormField(
-                                        labelText: "Flat Number".tr(), controller: managerService.flatNumberCont, context: context, maxLines: 1)),
-                                SizedBox(width: W / 40),
-                                Expanded(
-                                    child: CTextFormField(
-                                        labelText: "Number of People".tr(), controller: managerService.numberOfPeopleCont, context: context, maxLines: 1))
-                              ]),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Contact Name".tr(), controller: managerService.blockNameCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
-                              CTextFormField(labelText: "Balance".tr(), controller: managerService.balanceCont, context: context, maxLines: 1),
-                              SizedBox(height: W / 40),
+                              FormWidgets.buildSectionHeader(
+                                  "Personal Information", Icons.person_outline),
+                              // _buildFormField(
+                              //   "Apartment Name",
+                              //   managerService.apartmentNameCont,
+                              //   required: true,
+                              // ),
+                              // _buildFormField(
+                              //   "Name",
+                              //   managerService.nameCont,
+                              //   required: true,
+                              // ),
+                              // _buildFormField(
+                              //   "Last Name",
+                              //   managerService.surnameCont,
+                              //   required: true,
+                              // ),
+                              FormWidgets.buildFormField(
+                                "Contact Name",
+                                managerService.contactNameCont,
+                                required: true,
+                              ),
+                              FormWidgets.buildFormField(
+                                "Email",
+                                managerService.emailCont,
+                                keyboardType: TextInputType.emailAddress,
+                                required: false,
+                                customValidator: _validateEmail,
+                              ),
+                              FormWidgets.buildFormField(
+                                "Phone Number",
+                                managerService.phoneCont,
+                                keyboardType: TextInputType.phone,
+                                required: false,
+                                customValidator: _validatePhoneNumber,
+                              ),
+                              const SizedBox(height: 24),
+                              FormWidgets.buildSectionHeader(
+                                  "Identification", Icons.badge_outlined),
+                              FormWidgets.buildFormField(
+                                "Nationality No",
+                                managerService.nationaltyNoCont,
+                                keyboardType: TextInputType.number,
+                                required: true,
+                                customValidator: _validateNationalityNumber,
+                              ),
+                              const SizedBox(height: 24),
+                              FormWidgets.buildSectionHeader(
+                                  "Apartment Details", Icons.apartment),
+                              FormWidgets.buildFormField(
+                                "Block Name",
+                                managerService.blockNameCont,
+                                required: true,
+                              ),
+                              FormWidgets.buildFormField(
+                                "Plate No",
+                                managerService.plateCont,
+                                required: false,
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: FormWidgets.buildFormField(
+                                      "Flat Number",
+                                      managerService.flatNumberCont,
+                                      keyboardType: TextInputType.number,
+                                      required: true,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: FormWidgets.buildFormField(
+                                      "Number of People",
+                                      managerService.numberOfPeopleCont,
+                                      keyboardType: TextInputType.number,
+                                      required: false,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              FormWidgets.buildSectionHeader(
+                                  "Additional Information", Icons.info_outline),
+
+                              FormWidgets.buildFormField(
+                                "Balance",
+                                managerService.balanceCont,
+                                keyboardType: TextInputType.number,
+                                prefix: Text('₺ ',
+                                    style: AppTextStyles.cardTitle.copyWith(
+                                      color: GlobalConfig.primaryColor,
+                                      fontSize: 15,
+                                    )),
+                                required: false,
+                              ),
                             ],
-                          )))),
-              Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 10, right: 10),
-                  child: CButton(
-                      width: W,
-                      title: "Add",
-                      func: () {
-                        if (managerService.nameCont.text.isEmpty) {
-                          kShowDialogBanner(BannerType.ERROR, "Name cannot be empty. Please enter a valid name.", context);
-                        } else if (managerService.surnameCont.text.isEmpty) {
-                          kShowDialogBanner(BannerType.ERROR, "Last Name cannot be empty. Please enter a valid last name.", context);
-                        } else if (managerService.phoneCont.text.isEmpty) {
-                          kShowDialogBanner(BannerType.ERROR, "Phone Number cannot be empty. Please enter a valid phone number.", context);
-                        } else {
-                          managerService
-                              .addAndUpdateApartmentGuest(
-                                  guestId: null,
-                                  email: managerService.emailCont.text,
-                                  nationaltyNo: int.parse(managerService.nationaltyNoCont.text),
-                                  numberOfPeople: int.parse(managerService.numberOfPeopleCont.text),
-                                  flatNumber: managerService.flatNumberCont.text,
-                                  apartmentName: managerService.apartmentNameCont.text,
-                                  balance: double.parse(managerService.balanceCont.text),
-                                  blockName: managerService.blockNameCont.text,
-                                  endDate: managerService.endDate$.value,
-                                  startDate: managerService.startDate$.value,
-                                  contactName: managerService.contactNameCont.text)
-                              .then((value) {
-                            if (value?.result == true) {
-                              kShowDialogBanner(BannerType.SUCCESS, "Success", context);
-                            } else if (value?.result == false) {
-                              kShowDialogBanner(BannerType.SUCCESS, "ERROr", context);
-                            }
-                          });
-                        }
-                      }))
-            ]);
-          }),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              _buildSubmitButton(),
+            ],
+          );
+        },
+      ),
     );
   }
 
-// @override
-// Widget build(BuildContext context) {
-//   return Scaffold(
-//     appBar: AppBar(title: Text('Apartment Guests'.tr())),
-//     body: RefreshIndicator(
-//       color: GlobalConfig.primaryColor,
-//       onRefresh: () => globalService.fetchApartments(apartmentUid!),
-//       child: StreamBuilder<List<Apartment>?>(
-//         stream: globalService.apartments$.stream,
-//         builder: (context, snapshot) {
-//           if (isLoading$.value) {
-//             return Center(child: CircularProgressIndicator(color: GlobalConfig.primaryColor));
-//           }
-//
-//           final apartments = globalService.apartments$.value;
-//           if (apartments == null || apartments.isEmpty) {
-//             return Center(
-//               child: Column(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Icon(
-//                     Icons.apartment,
-//                     size: 64,
-//                     color: Colors.grey.shade400,
-//                   ),
-//                   const SizedBox(height: 16),
-//                   Text(
-//                     'No Apartments Found'.tr(),
-//                     style: AppTextStyles.cardTitle.copyWith(
-//                       color: Colors.grey.shade600,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             );
-//           }
-//
-//           return Column(
-//             children: [
-//               // _buildSearchBar(),
-//               Expanded(
-//                 child: ListView.builder(
-//                   padding: const EdgeInsets.only(bottom: 16),
-//                   itemCount: _filteredApartments.length,
-//                   itemBuilder: (context, index) {
-//                     var item = _filteredApartments[index];
-//                     return Container(
-//                       padding: paddingAll10,
-//                       margin: marginAll5,
-//                       decoration: BoxDecoration(
-//
-//                       ),
-//                       child: Text(item.name ?? '', style: k25Trajan(context)),
-//                     );
-//                   },
-//                 ),
-//               ),
-//             ],
-//           );
-//         },
-//       ),
-//     ),
-//   );
-// }
+  Widget _buildSubmitButton() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      padding: EdgeInsets.fromLTRB(
+          16, 8, 16, 8 + MediaQuery.of(context).padding.bottom),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: GlobalConfig.primaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          "Add Guest".tr(),
+          style: AppTextStyles.cardTitle.copyWith(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleSubmit() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    managerService
+        .addAndUpdateApartmentGuest(
+      guestId: null,
+      email: managerService.emailCont.text,
+      phone: int.tryParse(managerService.phoneCont.text) ?? 0,
+      nationaltyNo: int.tryParse(managerService.nationaltyNoCont.text) ?? 0,
+      numberOfPeople: int.tryParse(managerService.numberOfPeopleCont.text) ?? 1,
+      flatNumber: managerService.flatNumberCont.text,
+      apartmentName: managerService.apartmentNameCont.text,
+      balance: double.tryParse(managerService.balanceCont.text) ?? 0.0,
+      blockName: managerService.blockNameCont.text,
+      endDate: managerService.endDate$.value,
+      startDate: managerService.startDate$.value,
+      contactName: managerService.contactNameCont.text,
+    )
+        .then((response) {
+      Navigator.pop(context);
+
+      if (response!.result) {
+        CustomAlertBanner(
+          title: "Process Successful".tr(),
+          message: "New apartment resident successfully added.".tr(),
+          isSuccess: true,
+          onConfirm: () {
+            _clearForm();
+          },
+          confirmButtonText: "Add New Guest".tr(),
+          onClose: () {
+            _clearForm();
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+          closeButtonText: "Go Back".tr(),
+        ).show(context);
+      } else {
+        showCustomBanner(
+          context,
+          title: "Process Failed".tr(),
+          message: "New apartment resident cannot be added".tr(),
+          isSuccess: false,
+        );
+      }
+    }).catchError((error) {
+      // Close loading dialog
+      Navigator.pop(context);
+
+      showCustomBanner(
+        context,
+        title: "Error".tr(),
+        message: "An unexpected error occurred.".tr(),
+        isSuccess: false,
+      );
+    });
+  }
+
+  void _clearForm() {
+    managerService.emailCont.clear();
+    managerService.nationaltyNoCont.clear();
+    managerService.numberOfPeopleCont.clear();
+    managerService.flatNumberCont.clear();
+    managerService.apartmentNameCont.clear();
+    managerService.balanceCont.clear();
+    managerService.blockNameCont.clear();
+    managerService.contactNameCont.clear();
+    managerService.nameCont.clear();
+    managerService.surnameCont.clear();
+    managerService.phoneCont.clear();
+    managerService.plateCont.clear();
+    selectedPhoto$.value = null;
+    selectedPhoto$.add(null);
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) return null;
+
+    final emailRegExp =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegExp.hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) return null;
+
+    // Adjust this regex based on your specific phone number format requirements
+    final phoneRegExp =
+        RegExp(r'^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$');
+    if (!phoneRegExp.hasMatch(value)) {
+      return 'Enter a valid phone number';
+    }
+    return null;
+  }
+
+  String? _validateNationalityNumber(String? value) {
+    if (value == null || value.isEmpty) return null;
+
+    // Assuming nationality number is a numeric value with a specific length
+    if (value.length < 10 ||
+        value.length > 11 ||
+        !RegExp(r'^\d+$').hasMatch(value)) {
+      return 'Enter a valid nationality number (10-11 digits)';
+    }
+    return null;
+  }
+
+  Widget _buildPhotoSection(double width, ThemeData theme) {
+    return StreamBuilder(
+      stream: selectedPhoto$.stream,
+      builder: (context, snapshot) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade400),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(25),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: selectedPhoto$.value != null
+              ? _buildSelectedPhoto(width)
+              : _buildPhotoSelector(width),
+        );
+      },
+    );
+  }
+
+  Widget _buildSelectedPhoto(double width) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          child: SizedBox(
+            width: width - 32,
+            height: (width - 32) / 1.57,
+            child: PhotoView(
+              imageProvider: FileImage(File(selectedPhoto$.value!.path)),
+              initialScale: 0.093,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              selectedPhoto$.value = null;
+              selectedPhoto$.add(selectedPhoto$.value);
+            },
+            icon: const Icon(Icons.delete_outline),
+            label: Text(
+              "Remove Photo".tr(),
+              style: AppTextStyles.bodyText,
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade50,
+              foregroundColor: Colors.red,
+              elevation: 0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoSelector(double width) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.add_a_photo_outlined,
+            size: 42,
+            color: GlobalConfig.primaryColor,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Add Guest Photo".tr(),
+            style: AppTextStyles.cardTitle.copyWith(
+              color: GlobalConfig.primaryColor,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text("Take a new photo or select one from your gallery".tr(),
+              textAlign: TextAlign.center, style: AppTextStyles.bodyText),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _buildPhotoButton(
+                  icon: Icons.camera_alt_outlined,
+                  label: "Camera".tr(),
+                  onTap: () async {
+                    selectedPhoto$.value =
+                        await GlobalFunction().selectImageFromCamera();
+                    selectedPhoto$.add(selectedPhoto$.value);
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPhotoButton(
+                  icon: Icons.photo_library_outlined,
+                  label: "Gallery".tr(),
+                  primary: true,
+                  onTap: () async {
+                    selectedPhoto$.value =
+                        await GlobalFunction().selectImageFromGallery();
+                    selectedPhoto$.add(selectedPhoto$.value);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool primary = false,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon),
+      label: Text(
+        label,
+        style: AppTextStyles.bodyText.copyWith(
+          color: primary ? Colors.white : Colors.grey.shade800,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            primary ? GlobalConfig.primaryColor : Colors.grey.shade50,
+        foregroundColor: primary ? Colors.white : Colors.grey.shade800,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: primary ? Colors.transparent : Colors.grey.shade400,
+          ),
+        ),
+      ),
+    );
+  }
 }

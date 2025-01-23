@@ -1,112 +1,245 @@
-import 'package:apartmantmanager/global/enums/banner-enums.dart';
-import 'package:apartmantmanager/global/helpers/constants.dart';
 import 'package:apartmantmanager/global/index.dart';
 import 'package:apartmantmanager/index.dart';
-import 'package:apartmantmanager/widgets/CButton.dart';
-import 'package:apartmantmanager/widgets/CTextFormField.dart';
+import 'package:apartmantmanager/widgets/custom_alert.dart';
+import 'package:apartmantmanager/widgets/form_field.dart';
 import 'package:flutter/material.dart';
 
-class AddAnnounements extends StatefulWidget {
-  const AddAnnounements({super.key});
+class AddAnnouncements extends StatefulWidget {
+  const AddAnnouncements({super.key});
 
   @override
-  State<AddAnnounements> createState() => _AddAnnounementsState();
+  State<AddAnnouncements> createState() => _AddAnnouncementsState();
 }
 
-class _AddAnnounementsState extends State<AddAnnounements> {
-  final TextEditingController announcementCont = TextEditingController();
-  final BehaviorSubject<DateTime?> startDate$ = BehaviorSubject.seeded(null);
-  final BehaviorSubject<DateTime?> endDate$ = BehaviorSubject.seeded(null);
+class _AddAnnouncementsState extends State<AddAnnouncements> {
+  final globalService = GetIt.I<GlobalService>();
+  final managerService = GetIt.I<ManagerService>();
+  final _formKey = GlobalKey<FormState>();
 
-  Future<void> selectDate(BuildContext context, BehaviorSubject<DateTime?> dateSubject) async {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Add Announcement".tr(),
+        ),
+        elevation: 0,
+        backgroundColor: GlobalConfig.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: StreamBuilder(
+        stream: Rx.combineLatest2(
+            managerService.startDate$, managerService.endDate$, (a, b) => null),
+        builder: (context, snapshot) {
+          return Column(
+            children: [
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FormWidgets.buildSectionHeader(
+                              "Announcement Details".tr(),
+                              Icons.notification_add_outlined),
+
+                          // Start Date
+                          _buildDateField(context,
+                              label: "Start Date",
+                              dateSubject: managerService.startDate$),
+
+                          const SizedBox(height: 16),
+
+                          // End Date
+                          _buildDateField(context,
+                              label: "End Date",
+                              dateSubject: managerService.endDate$),
+
+                          const SizedBox(height: 16),
+
+                          // Announcement Content
+                          FormWidgets.buildFormField(
+                            "Announcement Content",
+                            managerService.contentCont,
+                            required: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              _buildSubmitButton(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDateField(BuildContext context,
+      {required String label,
+      required BehaviorSubject<DateTime?> dateSubject}) {
+    return InkWell(
+      onTap: () => _selectDate(context, dateSubject),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.grey.withAlpha(25),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3))
+            ]),
+        child: Text(
+          dateSubject.value != null
+              ? "${dateSubject.value!.toLocal().toString().split(' ')[0]} ${dateSubject.value!.hour.toString().padLeft(2, '0')}:${dateSubject.value!.minute.toString().padLeft(2, '0')}"
+              : "Select $label".tr(),
+          style: AppTextStyles.bodyText.copyWith(
+              color: dateSubject.value != null
+                  ? Colors.grey.shade900
+                  : Colors.grey.shade600),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDate(
+      BuildContext context, BehaviorSubject<DateTime?> dateSubject) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+
     if (pickedDate != null) {
-      dateSubject.add(pickedDate);
+      DateTime defaultDateTime = dateSubject == managerService.startDate$
+          ? pickedDate.copyWith(hour: 10, minute: 0, second: 0, millisecond: 0)
+          : pickedDate.copyWith(hour: 17, minute: 0, second: 0, millisecond: 0);
+
+      dateSubject.add(defaultDateTime);
     }
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      padding: EdgeInsets.fromLTRB(
+          16, 8, 16, 8 + MediaQuery.of(context).padding.bottom),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: GlobalConfig.primaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          "Add Announcement".tr(),
+          style: AppTextStyles.cardTitle.copyWith(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleSubmit() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    // Call add announcement method
+    managerService
+        .addAnnouncement(
+      startDate: managerService.startDate$.value,
+      endDate: managerService.endDate$.value,
+      content: managerService.contentCont.text,
+    )
+        .then((response) {
+      // Close loading dialog
+      Navigator.pop(context);
+
+      if (response?.result == true) {
+        CustomAlertBanner(
+          title: "Process Successful".tr(),
+          message: "Announcement added successfully.".tr(),
+          isSuccess: true,
+          onConfirm: () {
+            _clearForm();
+          },
+          confirmButtonText: "Add New".tr(),
+          onClose: () {
+            _clearForm();
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+          closeButtonText: "Go Back".tr(),
+        ).show(context);
+      } else {
+        showCustomBanner(
+          context,
+          title: "Process Failed".tr(),
+          message: response?.message ?? "Announcement could not be added".tr(),
+          isSuccess: false,
+        );
+      }
+    }).catchError((error) {
+      // Close loading dialog
+      Navigator.pop(context);
+
+      showCustomBanner(
+        context,
+        title: "Error".tr(),
+        message: "An unexpected error occurred.".tr(),
+        isSuccess: false,
+      );
+    });
+  }
+
+  void _clearForm() {
+    managerService.startDate$.add(null);
+    managerService.endDate$.add(null);
+    managerService.contentCont.clear();
   }
 
   @override
   void dispose() {
-    startDate$.close();
-    endDate$.close();
+    // Clear form controllers if needed
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double W = MediaQuery.of(context).size.width;
-    double H = MediaQuery.of(context).size.height;
-
-    return Scaffold(
-      appBar: AppBar(title: Text("Add Announcement".tr())),
-      body: StreamBuilder(
-          stream: Rx.combineLatest3(startDate$, endDate$, isLoading$, (a, b, c) => null),
-          builder: (context, snapshot) {
-            return GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: SingleChildScrollView(
-                child: Container(
-                  height: H * 0.8,
-                  padding: paddingAll10,
-                  child: Column(
-                    children: [
-                      Expanded(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        InkWell(
-                            onTap: () => selectDate(context, startDate$),
-                            child: Container(
-                                width: W,
-                                padding: paddingAll10,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: borderRadius10,
-                                    boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 1, blurRadius: 5, offset: Offset(0, 3))]),
-                                child: Text(startDate$.value != null ? "Selected Date: ${startDate$.value!.toLocal()}".split(' ')[0] : "Select Start Date".tr(),
-                                    style: k28Gilroy(context)))),
-                        SizedBox(height: W / 40),
-                        InkWell(
-                            onTap: () => selectDate(context, startDate$),
-                            child: Container(
-                                width: W,
-                                padding: paddingAll10,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: borderRadius10,
-                                    boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 1, blurRadius: 5, offset: Offset(0, 3))]),
-                                child: Text(startDate$.value != null ? "End Date: ${startDate$.value!.toLocal()}".split(' ')[0] : "Select End Date".tr(),
-                                    style: k28Gilroy(context)))),
-                        SizedBox(height: W / 40),
-                        CTextFormField(labelText: "Announcement Note Added".tr(), controller: announcementCont, context: context, maxLines: 5),
-                      ])),
-                      Padding(
-                        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                        child: CButton(
-                          width: W,
-                          title: "Add Announcement".tr(),
-                          func: () {
-                            isLoading$.add(true);
-                            GetIt.I<ManagerService>().addAnnouncement().then((value) {
-                              isLoading$.add(false);
-                              if (value?.result == true) {
-                                kShowDialogBanner(BannerType.SUCCESS, "Succesfull", context);
-                              } else if (value?.result == false) {
-                                kShowDialogBanner(BannerType.ERROR, "Error", context);
-                              }
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }),
-    );
   }
 }
