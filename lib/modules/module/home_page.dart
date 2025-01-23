@@ -45,8 +45,10 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          titlePadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          titlePadding:
+              const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           actionsPadding: const EdgeInsets.only(bottom: 15, right: 15, top: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -125,25 +127,44 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildWelcomeCard(double width) {
     final apartments = _globalService.apartments$.value;
-    if (apartments == null || apartments.isEmpty) return const SizedBox.shrink();
+    if (apartments == null || apartments.isEmpty)
+      return const SizedBox.shrink();
 
     return Padding(
-
         padding: const EdgeInsets.all(10),
         child: Container(
             width: width,
-            padding: EdgeInsets.symmetric(vertical: width / 30, horizontal: width / 20),
+            padding: EdgeInsets.symmetric(
+                vertical: width / 30, horizontal: width / 20),
             decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    colors: [const Color(0xFFDF1940).withAlpha(240), const Color(0xFFC4173A)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  colors: [
+                    GlobalConfig.primaryColor.withAlpha(230),
+                    GlobalConfig.primaryColor.withValues(red: 60),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(10),
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(40), blurRadius: 30, spreadRadius: 0, offset: const Offset(0, 10))]),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text("Welcome!".tr(), style: AppTextStyles.titleLight.copyWith(color: Colors.white)),
-              SizedBox(height: width / 40),
-              Text("${apartments.first.name}", style: AppTextStyles.titleBold.copyWith(color: Colors.white))
-            ])));
-
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(50),
+                    blurRadius: 10,
+                    offset: const Offset(4, 6),
+                  ),
+                ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Welcome!".tr(),
+                      style: AppTextStyles.titleLight
+                          .copyWith(color: Colors.white)),
+                  SizedBox(height: width / 40),
+                  Text("${apartments.first.name}",
+                      style:
+                          AppTextStyles.titleBold.copyWith(color: Colors.white))
+                ])));
   }
 
   Widget _buildHomeItem({
@@ -163,15 +184,35 @@ class _HomePageState extends State<HomePage> {
             width: width / 2.28,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [firstColor.withAlpha(150), secondColor], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                gradient: LinearGradient(
+                    colors: [firstColor.withAlpha(150), secondColor],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(10.0),
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 30, spreadRadius: 0, offset: const Offset(5, 10))]),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-              SizedBox(
-                  width: width / 6, height: width / 6, child: Image.asset(imageAsset, fit: BoxFit.contain, alignment: Alignment.center, color: Colors.white)),
-              SizedBox(height: width / 30),
-              Text(title, style: AppTextStyles.cardTitle.copyWith(color: Colors.white), textAlign: TextAlign.center)
-            ])));
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(50),
+                    blurRadius: 10,
+                    offset: const Offset(4, 6),
+                  ),
+                ]),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                      width: width / 6,
+                      height: width / 6,
+                      child: Image.asset(imageAsset,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.center,
+                          color: Colors.white)),
+                  SizedBox(height: width / 30),
+                  Text(title,
+                      style:
+                          AppTextStyles.cardTitle.copyWith(color: Colors.white),
+                      textAlign: TextAlign.center)
+                ])));
   }
 
   Widget _buildHomeGrid(double width) {
@@ -183,7 +224,8 @@ class _HomePageState extends State<HomePage> {
           secondColor: const Color(0xFF5F0FF8),
           width: width,
           onTap: () {
-            Navigator.push(context, RouteAnimation.createRoute(const ApartmentResidents(), 1, 0));
+            Navigator.push(context,
+                RouteAnimation.createRoute(const ApartmentResidents(), 1, 0));
           }),
       _buildHomeItem(
         title: "Income & Expenses".tr(),
@@ -195,7 +237,8 @@ class _HomePageState extends State<HomePage> {
           if (_apartmentUid != null) {
             Navigator.push(
               context,
-              RouteAnimation.createRoute(Expenses(apartmentUid: _apartmentUid!), 1, 0),
+              RouteAnimation.createRoute(
+                  Expenses(apartmentUid: _apartmentUid!), 1, 0),
             );
           } else {
             _showError('Invalid apartment data');
@@ -218,11 +261,12 @@ class _HomePageState extends State<HomePage> {
       _buildHomeItem(
           title: "Apartment Manager".tr(),
           imageAsset: "assets/icons/apartment-manager.png",
-          firstColor: const Color(0xFF980FB6),
-          secondColor: const Color(0xFFFF059B),
+          firstColor: const Color.fromARGB(255, 254, 146, 23),
+          secondColor: const Color.fromARGB(255, 255, 118, 5),
           width: width,
           onTap: () {
-            Navigator.push(context, RouteAnimation.createRoute(const ManagerApartmentInfo(), 1, 0));
+            Navigator.push(context,
+                RouteAnimation.createRoute(const ManagerApartmentInfo(), 1, 0));
           })
     ]);
   }
@@ -232,15 +276,22 @@ class _HomePageState extends State<HomePage> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return StreamBuilder(
-      stream: Rx.combineLatest2(_globalService.apartments$, isLoading$, (a, b) => null),
+      stream: Rx.combineLatest2(
+          _globalService.apartments$, isLoading$, (a, b) => null),
       builder: (context, snapshot) {
         return Scaffold(
           backgroundColor: const Color(0xFFFAFAFA),
-          appBar: AppBar(
-              title: Text("Apartment Management".tr()),
-              actions: [IconButton(icon: const Icon(Icons.qr_code_scanner), onPressed: _resetAndScanQR, tooltip: 'Reset and Scan New QR'.tr(), iconSize: 26)]),
+          appBar: AppBar(title: Text("Apartment Management".tr()), actions: [
+            IconButton(
+                icon: const Icon(Icons.qr_code_scanner),
+                onPressed: _resetAndScanQR,
+                tooltip: 'Reset and Scan New QR'.tr(),
+                iconSize: 26)
+          ]),
           body: isLoading$.value
-              ? Center(child: CircularProgressIndicator(color: GlobalConfig.primaryColor))
+              ? Center(
+                  child: CircularProgressIndicator(
+                      color: GlobalConfig.primaryColor))
               : RefreshIndicator(
                   color: GlobalConfig.primaryColor,
                   onRefresh: _initializeData,
