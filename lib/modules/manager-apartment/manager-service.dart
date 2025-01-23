@@ -98,7 +98,7 @@ class ManagerService {
               "NUMBEROFPEOPLE": numberOfPeople,
               "STARTDATE": startDate?.toIso8601String(),
               "ENDDATE": endDate?.toIso8601String(),
-              "PLATENO": plateNo,
+              "PLATENO": plateNo?.trim().toUpperCase(),
               "OWNERNAME": ownerName,
               "OWNERPHONE": ownerPhone,
               "BALANCE": balance,
@@ -108,20 +108,19 @@ class ManagerService {
 
       if (response.statusCode == 200) {
         try {
-          var data = json.decode(utf8.decode(response.bodyBytes));
-
-          if (data['status'] == 'success' || data['result'] == true) {
+          var responseBody = utf8.decode(response.bodyBytes);
+          List<dynamic> data = json.decode(responseBody);
+          if (data.isEmpty) {
             return RequestResponse(
-                message: "Apartment guest added/updated successfully.",
-                result: true);
+                message: "Apartment resident added successfully", result: true);
           } else {
-            String errorMessage =
-                data['message'] ?? "Apartment guest could not be added/updated";
-            return RequestResponse(message: errorMessage, result: false);
+            return RequestResponse(
+                message: "Unexpected response format: $responseBody",
+                result: false);
           }
         } catch (decodeError) {
           return RequestResponse(
-            message: "Response parsing failed: ${decodeError.toString()}",
+            message: "Response parsing failed: $decodeError",
             result: false,
           );
         }

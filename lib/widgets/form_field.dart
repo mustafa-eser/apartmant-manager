@@ -61,7 +61,7 @@ class FormWidgets {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade400),
+            borderSide: BorderSide(color: Colors.grey.shade300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -77,7 +77,7 @@ class FormWidgets {
             borderSide: BorderSide(color: Colors.red.shade200),
           ),
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: Colors.white,
         ),
       ),
     );
